@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">The Memory Game</string>
+    <string name="url">https://stocksnap.io</string>
 </resources>

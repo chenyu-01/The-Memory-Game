@@ -83,17 +83,32 @@ public class MainActivity extends AppCompatActivity
         }).start();
 
     }
-    protected List<ImageModel> fetchFromWebsite(String Url){
-        List <ImageModel> imageModelList = new ArrayList<>();
-        for( int i=1; i <=20;i++){
-//            String imageUrl = Url+ "/image"+ i+".jpg";
-            String imageUrl = "https://cdn.stocksnap.io/img-thumbs/960w/bokeh-holiday_CWF71OUT9U.jpg";
-            imageModelList.add(new ImageModel(imageUrl));
+    protected List<ImageModel> fetchFromWebsite(String url) {
+        List<ImageModel> imageModelList = new ArrayList<>();
+
+        try {
+            // Connect to the website and parse its HTML
+            Document doc = Jsoup.connect(url).get();
+
+            // Select all image elements from the HTML
+            Elements images = doc.select("img");
+
+            // Loop through each element and get the src attribute
+            for (Element img : images) {
+                if (imageModelList.size() >= 20) break; // Limit to 20 images
+                String imageUrl = img.absUrl("src"); // Get absolute URL of the image
+                if (!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png")) continue; // Ignore if not a JPG or PNG image
+                imageModelList.add(new ImageModel(imageUrl));
+            }
+
+        } catch (Exception e) {
+            Log.e("FetchFromWebsite", "Error fetching images", e);
         }
 
         Log.d("FetchFromWebsite", "Fetched " + imageModelList.size() + " image URLs");
         return imageModelList;
     }
+
 
 
     @Override

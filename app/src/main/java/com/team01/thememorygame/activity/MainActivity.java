@@ -1,4 +1,4 @@
-package com.team01.thememorygame;
+package com.team01.thememorygame.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -10,12 +10,16 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.team01.thememorygame.ImageAdapter;
+import com.team01.thememorygame.ImageModel;
+import com.team01.thememorygame.R;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

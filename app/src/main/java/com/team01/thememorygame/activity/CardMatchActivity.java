@@ -1,3 +1,4 @@
+package com.team01.thememorygame.activity;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
@@ -10,10 +11,8 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,10 +22,11 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
 
-import com.apple.small.cardmatchgame.R;
-import com.apple.small.cardmatchgame.Utils.DelayAction;
-import com.apple.small.cardmatchgame.bean.CardBean;
+import com.team01.thememorygame.R;
+import com.team01.thememorygame.Utils.DelayAction;
+import com.team01.thememorygame.bean.CardBean;
 
 import java.util.ArrayList;
 import java.util.Collections;

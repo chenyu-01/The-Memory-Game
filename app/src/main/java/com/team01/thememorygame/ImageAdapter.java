@@ -2,6 +2,7 @@ package com.team01.thememorygame;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,19 +55,15 @@ public class ImageAdapter extends BaseAdapter {
         imageView = convertView.findViewById(R.id.grid_image);
 
         // Now you can use Picasso to load the image into the ImageView
-//        Picasso.get().load(imageUrls.get(position).getImageUrl()).into(imageView);
-
-
         Picasso.get().load(imageUrls.get(position).getImageUrl())
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.noimage)
                 .fit()
                 .centerCrop()
                 .into(imageView);
+
         return imageView;
     }
 
 
-    public void setImageDrawable(Drawable placeHolderDrawable) {
-    }
 }

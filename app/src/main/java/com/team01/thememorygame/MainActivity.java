@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ProgressBar mprogressBar;
     GridView mgridView;
     Button mbutton;
-    String searchUrl;
     ImageAdapter imageAdapter;
 
 

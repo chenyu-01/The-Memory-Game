@@ -38,4 +38,5 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("org.jsoup:jsoup:1.14.3")
     implementation ("com.squareup.picasso:picasso:2.8")
+    implementation ("com.makeramen:roundedimageview:2.3.0")
 }

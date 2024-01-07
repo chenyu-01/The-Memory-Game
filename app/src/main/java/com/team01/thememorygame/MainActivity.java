@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onTaskCompleted(List<ImageModel> result) {
-        mprogressBar.setVisibility(View.GONE);
+
         if (result != null && !result.isEmpty()) {
             imageAdapter = new ImageAdapter(MainActivity.this, result);
             mgridView.setAdapter(imageAdapter);

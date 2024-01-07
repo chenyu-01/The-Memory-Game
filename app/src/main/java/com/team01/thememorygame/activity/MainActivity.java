@@ -81,6 +81,7 @@ public class MainActivity extends AppCompatActivity
                 // Background thread work
                 List<ImageModel> imageModelList = fetchFromWebsite(Url);
 
+
                 // Post results back to the main thread
                 runOnUiThread(new Runnable() {
                     @Override
@@ -112,10 +113,12 @@ public class MainActivity extends AppCompatActivity
 
             // Loop through each element and get the src attribute
             for (Element img : images) {
+                Thread.sleep(100);
                 if (imageModelList.size() >= 20) break; // Limit to 20 images
                 String imageUrl = img.absUrl("src"); // Get absolute URL of the image
                 if (!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png")) continue; // Ignore if not a JPG or PNG image
                 imageModelList.add(new ImageModel(imageUrl));
+                onProgressChanged(imageModelList.size());
             }
 
         } catch (Exception e) {
@@ -126,6 +129,14 @@ public class MainActivity extends AppCompatActivity
         return imageModelList;
     }
 
+    private void onProgressChanged(int progress) {
+        int newProgress = (int) (((float)progress/20)*100);
+        if(newProgress == 100){
+            mprogressBar.setProgress(View.GONE);
+        }
+        mprogressBar.setVisibility(View.VISIBLE);
+        mprogressBar.setProgress(newProgress);
+    }
 
 
     @Override

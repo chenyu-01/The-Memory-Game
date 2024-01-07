@@ -56,7 +56,7 @@ public class ImageAdapter extends BaseAdapter {
 
         // Now you can use Picasso to load the image into the ImageView
         Picasso.get().load(imageUrls.get(position).getImageUrl())
-                .placeholder(R.drawable.noimage)
+                .placeholder(R.drawable.loading)
                 .error(R.drawable.noimage)
                 .fit()
                 .centerCrop()

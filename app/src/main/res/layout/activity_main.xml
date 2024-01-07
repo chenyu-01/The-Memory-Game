@@ -1,5 +1,4 @@
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -24,26 +23,27 @@
 
     <GridView
         android:id="@+id/gridView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="365dp"
+        android:layout_height="552dp"
         android:layout_marginTop="16dp"
-        android:numColumns="3"
         android:horizontalSpacing="8dp"
-        android:verticalSpacing="8dp"
+        android:numColumns="4"
         android:stretchMode="columnWidth"
-        app:layout_constraintTop_toBottomOf="@id/inputUrl"
+        android:verticalSpacing="8dp"
         app:layout_constraintBottom_toTopOf="@id/progressBar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/inputUrl"
+        app:layout_constraintVertical_bias="0.0">
 
+    </GridView>
     <ProgressBar
         android:id="@+id/progressBar"
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-        android:layout_width="0dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="visible"
-        android:max="100"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        tools:layout_editor_absoluteX="171dp"
+        tools:layout_editor_absoluteY="661dp"
+        android:max="20"
+        tools:ignore="MissingConstraints" />
 </androidx.constraintlayout.widget.ConstraintLayout>

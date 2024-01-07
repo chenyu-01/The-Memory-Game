@@ -10,18 +10,23 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ImageAdapter extends BaseAdapter {
 
     private Context context;
     private List<ImageModel> imageUrls;
 
+    private Set<Integer> selectedPositions;
+
     LayoutInflater inflater;
 
     public ImageAdapter(Context context,List <ImageModel> imageUrls){
         this.context=context;
         this.imageUrls=imageUrls;
+        this.selectedPositions= new HashSet<>();
     }
 
     @Override
@@ -30,7 +35,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public ImageModel getItem(int position) {
         return imageUrls.get(position);
     }
 
@@ -53,8 +58,6 @@ public class ImageAdapter extends BaseAdapter {
 
         imageView = convertView.findViewById(R.id.grid_image);
 
-        // Now you can use Picasso to load the image into the ImageView
-//        Picasso.get().load(imageUrls.get(position).getImageUrl()).into(imageView);
 
 
         Picasso.get().load(imageUrls.get(position).getImageUrl())
@@ -63,10 +66,30 @@ public class ImageAdapter extends BaseAdapter {
                 .fit()
                 .centerCrop()
                 .into(imageView);
+
+        if(selectedPositions.contains(position)) {
+            imageView.setAlpha(0.5f);
+        } else {
+            imageView.setAlpha(1.0f);
+        }
         return imageView;
     }
 
 
     public void setImageDrawable(Drawable placeHolderDrawable) {
+    }
+
+
+    public void toggleSelection(int position) {
+        if(selectedPositions.contains(position)) {
+            selectedPositions.remove(position);
+        } else {
+            selectedPositions.add(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    public Set<Integer> getSelectedPositions() {
+        return selectedPositions;
     }
 }

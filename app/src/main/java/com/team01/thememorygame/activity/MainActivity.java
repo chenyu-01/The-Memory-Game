@@ -2,9 +2,12 @@ package com.team01.thememorygame.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -21,6 +24,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -34,6 +39,8 @@ public class MainActivity extends AppCompatActivity
     String searchUrl;
     ImageAdapter imageAdapter;
 
+    HashSet<ImageModel> selectedImages = new HashSet<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,16 @@ public class MainActivity extends AppCompatActivity
 //        searchUrl= "https://stocksnap.io";
 
         mbutton.setOnClickListener(this);
+        mgridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                imageAdapter.toggleSelection(position);
+                onImageSelected(imageAdapter.getItem(position));
+                // Optional: Update UI based on the number of selected items
+                // For example, enable/disable the confirm button
+            }
+        });
+
     }
 
 
@@ -115,5 +132,23 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         clearImages();
         fetchImages(meditText.getText().toString());
+    }
+
+    public void onImageSelected(ImageModel imageModel) {
+        if (selectedImages.contains(imageModel)) {
+            selectedImages.remove(imageModel);
+        } else {
+            selectedImages.add(imageModel);
+        }
+        if(selectedImages.size() == 6){
+            // save selected images to shared preferences
+            // Proceed to CardMatchingActivity
+            proceedToGame();
+        }
+    }
+
+    public void proceedToGame(){
+        Intent intent = new Intent(this, CardMatchActivity.class);
+        startActivity(intent);
     }
 }

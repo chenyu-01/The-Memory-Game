@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         clearImages();
         try {
-            new FetchImageUrlTask(this).execute(meditText.getText().toString());
+            new FetchImageUrlTask(this, mprogressBar).execute(meditText.getText().toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

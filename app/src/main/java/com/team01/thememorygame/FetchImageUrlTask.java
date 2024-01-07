@@ -1,6 +1,9 @@
 package com.team01.thememorygame;
 
 import android.os.AsyncTask;
+import android.view.View;
+import android.widget.ProgressBar;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,14 +14,24 @@ import java.util.List;
 
 public class FetchImageUrlTask extends AsyncTask<String, Void, List<ImageModel>> {
 
+    private ProgressBar mProgressBar;
     public interface Callback {
         void onTaskCompleted(List<ImageModel> result);
     }
 
     private Callback callback;
 
-    public FetchImageUrlTask(Callback callback) {
+    public FetchImageUrlTask(Callback callback, ProgressBar mProgressBar) {
         this.callback = callback;
+        this.mProgressBar = mProgressBar;
+    }
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        // Show the progress bar before starting the background task
+        if (mProgressBar != null) {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -44,6 +57,10 @@ public class FetchImageUrlTask extends AsyncTask<String, Void, List<ImageModel>>
 
     @Override
     protected void onPostExecute(List<ImageModel> result) {
+        if (mProgressBar != null) {
+            mProgressBar.setVisibility(View.GONE);
+        }
+
         if (callback != null) {
             callback.onTaskCompleted(result);
         }

@@ -58,7 +58,7 @@ public class ImageAdapter extends BaseAdapter {
 
 
         Picasso.get().load(imageUrls.get(position).getImageUrl())
-                .placeholder(R.drawable.noimage)
+                .placeholder(R.drawable.loading)
                 .error(R.drawable.noimage)
                 .fit()
                 .centerCrop()

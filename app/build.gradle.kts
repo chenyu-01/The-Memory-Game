@@ -38,4 +38,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("org.jsoup:jsoup:1.14.3")
     implementation ("com.squareup.picasso:picasso:2.8")
+    implementation ("com.github.bumptech.glide:glide:4.12.0") // Use the latest version
+    annotationProcessor( "com.github.bumptech.glide:compiler:4.12.0")
+
 }

@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -59,7 +58,10 @@ public class ImageAdapter extends BaseAdapter {
 
         // Now you can use Picasso to load the image into the ImageView
         Picasso.get().load(imageUrls.get(position).getImageUrl())
-//                .placeholder(R.drawable.noimage)
+                .placeholder(R.drawable.noimage)
+                .error(R.drawable.noimage)
+                .fit()
+                .centerCrop()
                 .into(imageView);
 
         return imageView;

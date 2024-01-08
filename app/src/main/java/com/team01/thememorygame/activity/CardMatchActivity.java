@@ -4,6 +4,7 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -24,6 +25,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.team01.thememorygame.ImageAdapter;
+import com.team01.thememorygame.ImageModel;
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
 import com.team01.thememorygame.bean.CardBean;
@@ -118,6 +121,9 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent = getIntent();
+        Bundle allIntents = intent.getExtras();
+        ArrayList<ImageModel> selectedImages = (ArrayList<ImageModel>) allIntents.getSerializable("selectedImages");
         initView();
         initData();
         loadAnim();

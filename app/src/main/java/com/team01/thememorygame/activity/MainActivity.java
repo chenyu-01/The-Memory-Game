@@ -242,6 +242,7 @@ public class MainActivity extends AppCompatActivity
 
     public void proceedToGame(){
         Intent intent = new Intent(this, CardMatchActivity.class);
+        intent.putExtra("selectedImages", selectedImages);
         startActivity(intent);
     }
 }

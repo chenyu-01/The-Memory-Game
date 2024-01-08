@@ -3,6 +3,8 @@ package com.team01.thememorygame.activity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,11 +25,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity
         implements View.OnClickListener {
@@ -39,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     String searchUrl;
     ImageAdapter imageAdapter;
 
-    HashSet<ImageModel> selectedImages = new HashSet<>();
+    ArrayList<ImageModel> selectedImages = new ArrayList<>();
 
 
     @Override
@@ -118,7 +124,7 @@ public class MainActivity extends AppCompatActivity
                 String imageUrl = img.absUrl("src"); // Get absolute URL of the image
                 if (!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png")) continue; // Ignore if not a JPG or PNG image
                 imageModelList.add(new ImageModel(imageUrl));
-                onProgressChanged(imageModelList.size());
+                onProgressChanged(imageModelList.size()); // Update progress bar
             }
 
         } catch (Exception e) {
@@ -152,11 +158,47 @@ public class MainActivity extends AppCompatActivity
             selectedImages.add(imageModel);
         }
         if(selectedImages.size() == 6){
-            // save selected images to shared preferences
+            // save selected images to internal app specific storage
+            saveImages();
             // Proceed to CardMatchingActivity
             proceedToGame();
         }
     }
+
+    private void saveImages() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                File imagesDir = new File(getFilesDir(), "images");
+                if (!imagesDir.exists() && !imagesDir.mkdirs()) {
+                    Log.e("SaveImages", "Failed to create images directory");
+                    return;
+                }
+
+                for (ImageModel imageModel : selectedImages) {
+                    try {
+                        URL imageUrl = new URL(imageModel.getImageUrl());
+                        HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+                        connection.setDoInput(true);
+                        connection.connect();
+                        Log.d("Response", connection.getResponseMessage());
+                        InputStream input = connection.getInputStream();
+                        Bitmap image = BitmapFactory.decodeStream(input);
+
+                        File newImage = new File(imagesDir, "img" + selectedImages.indexOf(imageModel) + ".png");
+                        try (FileOutputStream out = new FileOutputStream(newImage)) {
+                            image.compress(Bitmap.CompressFormat.PNG, 100, out); // PNG is a lossless format
+                        }
+
+                        imageModel.setLocalPath(newImage.getAbsolutePath());
+                    } catch (Exception e) {
+                        Log.e("SaveImages", "Error saving image", e);
+                    }
+                }
+            }
+        }).start();
+    }
+
 
     public void proceedToGame(){
         Intent intent = new Intent(this, CardMatchActivity.class);

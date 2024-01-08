@@ -109,7 +109,6 @@ public class MainActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-
                                 imageAdapter = new ImageAdapter(MainActivity.this, imageModelList);
                                 onProgressChanged(imageModelList.size());
                                 mgridView.setAdapter(imageAdapter);
@@ -120,7 +119,6 @@ public class MainActivity extends AppCompatActivity
                         count_pic += 1;
 
                     }
-                    Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
 
                 }catch (Exception e) {
                     Log.e("Error", e.getMessage());
@@ -185,6 +183,7 @@ public class MainActivity extends AppCompatActivity
                     try {
                         URL imageUrl = new URL(imageModel.getImageUrl());
                         HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+                        connection.setRequestProperty("User-Agent", "Mozilla/5.0");
                         connection.setDoInput(true);
                         connection.connect();
                         Log.d("Response", connection.getResponseMessage());
@@ -208,7 +207,6 @@ public class MainActivity extends AppCompatActivity
 
     public void proceedToGame(){
         Intent intent = new Intent(this, CardMatchActivity.class);
-        intent.putExtra("selectedImages", selectedImages);
         startActivity(intent);
     }
 }

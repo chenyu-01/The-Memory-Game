@@ -121,9 +121,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent = getIntent();
-        Bundle allIntents = intent.getExtras();
-        ArrayList<ImageModel> selectedImages = (ArrayList<ImageModel>) allIntents.getSerializable("selectedImages");
         initView();
         initData();
         loadAnim();

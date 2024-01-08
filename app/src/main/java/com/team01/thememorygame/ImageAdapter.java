@@ -68,8 +68,8 @@ public class ImageAdapter extends BaseAdapter {
                 .centerCrop()
                 .into(imageView);
 
-        if(selectedPositions.contains(position)) {
-            imageView.setAlpha(0.5f);
+        if(selectedPositions.contains(position)) { // Todo: change this to a better way
+            imageView.setAlpha(0.5f); // change opacity
         } else {
             imageView.setAlpha(1.0f);
         }

@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity
         List <ImageModel> emptyList = new ArrayList<>();
         imageAdapter = new ImageAdapter(this,emptyList);
         mgridView.setAdapter(imageAdapter);
-    };
+    }
 
     protected void fetchImages(String Url) {
 
@@ -88,7 +88,6 @@ public class MainActivity extends AppCompatActivity
 
             List<ImageModel> imageModelList = new ArrayList<>();
             int count_pic = 0;
-
 
             @Override
             public void run() {
@@ -121,16 +120,10 @@ public class MainActivity extends AppCompatActivity
                         count_pic += 1;
 
                     }
-
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
-                        }
-                    });
+                    Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
 
                 }catch (Exception e) {
-                    System.out.println(e);
+                    Log.e("Error", e.getMessage());
                 }
 
             }
@@ -138,33 +131,6 @@ public class MainActivity extends AppCompatActivity
         });
         bkgdthread.start();
 
-    }
-    protected List<ImageModel> fetchFromWebsite(String url) {
-        List<ImageModel> imageModelList = new ArrayList<>();
-
-        try {
-            // Connect to the website and parse its HTML
-            Document doc = Jsoup.connect(url).get();
-
-            // Select all image elements from the HTML
-            Elements images = doc.select("img");
-
-            // Loop through each element and get the src attribute
-            for (Element img : images) {
-                Thread.sleep(100);
-                if (imageModelList.size() >= 20) break; // Limit to 20 images
-                String imageUrl = img.absUrl("src"); // Get absolute URL of the image
-                if (!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png")) continue; // Ignore if not a JPG or PNG image
-                imageModelList.add(new ImageModel(imageUrl));
-                onProgressChanged(imageModelList.size()); // Update progress bar
-            }
-
-        } catch (Exception e) {
-            Log.e("FetchFromWebsite", "Error fetching images", e);
-        }
-
-        Log.d("FetchFromWebsite", "Fetched " + imageModelList.size() + " image URLs");
-        return imageModelList;
     }
 
     private void onProgressChanged(int progress) {

@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.team01.thememorygame.ImageAdapter;
@@ -46,6 +47,8 @@ public class MainActivity extends AppCompatActivity
     ImageAdapter imageAdapter;
 
     ArrayList<ImageModel> selectedImages = new ArrayList<>();
+    TextView mprogressText;
+    Thread bkgdthread;
 
 
     @Override
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity
                 // For example, enable/disable the confirm button
             }
         });
+        mprogressText = findViewById(R.id.download_info);
 
     }
 
@@ -78,33 +82,61 @@ public class MainActivity extends AppCompatActivity
         mgridView.setAdapter(imageAdapter);
     };
 
-    protected void fetchImages(String Url){
-        mprogressBar.setVisibility(View.VISIBLE);
+    protected void fetchImages(String Url) {
 
-        new Thread(new Runnable() {
+        bkgdthread = new Thread(new Runnable() {
+
+            List<ImageModel> imageModelList = new ArrayList<>();
+            int count_pic = 0;
+
+
             @Override
             public void run() {
-                // Background thread work
-                List<ImageModel> imageModelList = fetchFromWebsite(Url);
+                try {
+                    Document doc = Jsoup.connect(Url).get();
 
+                    // Select all image elements from the HTML
+                    Elements images = doc.select("img");
 
-                // Post results back to the main thread
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mprogressBar.setVisibility(View.GONE);
-                        if(imageModelList != null && !imageModelList.isEmpty()){
-                            imageAdapter = new ImageAdapter(MainActivity.this, imageModelList);
-                            mgridView.setAdapter(imageAdapter);
-                            mgridView.setVisibility(View.VISIBLE);
-                            Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(MainActivity.this, "Failed to load images", Toast.LENGTH_LONG).show();
-                        }
+                    for (int i = 0; i < Integer.MAX_VALUE; i++) {
+                        Thread.sleep(100);
+                        if(count_pic == 20)
+                            break;
+
+                        String imageUrl = images.get(i).absUrl("src");
+                        if(!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png"))
+                            continue;
+                        imageModelList.add(new ImageModel(imageUrl));
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                imageAdapter = new ImageAdapter(MainActivity.this, imageModelList);
+                                onProgressChanged(imageModelList.size());
+                                mgridView.setAdapter(imageAdapter);
+                                mgridView.setVisibility(View.VISIBLE);
+                            }
+                        });
+
+                        count_pic += 1;
+
                     }
-                });
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                }catch (Exception e) {
+                    System.out.println(e);
+                }
+
             }
-        }).start();
+
+        });
+        bkgdthread.start();
 
     }
     protected List<ImageModel> fetchFromWebsite(String url) {
@@ -137,16 +169,24 @@ public class MainActivity extends AppCompatActivity
 
     private void onProgressChanged(int progress) {
         int newProgress = (int) (((float)progress/20)*100);
+        String newText = "Downloading " + progress + " of 20 images.";
         if(newProgress == 100){
-            mprogressBar.setProgress(View.GONE);
+            mprogressBar.setVisibility(View.GONE);
+            mprogressText.setVisibility(View.GONE);
+        }else{
+            mprogressBar.setVisibility(View.VISIBLE);
+            mprogressText.setVisibility(View.VISIBLE);
+            mprogressBar.setProgress(newProgress);
+            mprogressText.setText(newText);
         }
-        mprogressBar.setVisibility(View.VISIBLE);
-        mprogressBar.setProgress(newProgress);
     }
 
 
     @Override
     public void onClick(View v) {
+        if(bkgdthread != null && bkgdthread.isAlive()){
+            bkgdthread.interrupt();
+        }
         clearImages();
         fetchImages(meditText.getText().toString());
     }

@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity
     Button fetchButton, startGameButton;
     String searchUrl;
     ImageAdapter imageAdapter;
-
+    Boolean isFetching = false;
     ArrayList<ImageModel> selectedImages = new ArrayList<>();
     TextView mprogressText;
     Thread fetchImageThread;
@@ -62,14 +62,15 @@ public class MainActivity extends AppCompatActivity
         mgridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(selectedImages.size() == 6){
-                    // check if the image is not selected already
-                    if(!selectedImages.contains(imageAdapter.getItem(position))){
-                        Toast.makeText(MainActivity.this, "You can only select 6 images", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                if (isFetching) {
+                    Toast.makeText(MainActivity.this, "Still Loading, Please Wait", Toast.LENGTH_SHORT).show();
+                    return;
                 }
-                startGameButton.setVisibility(View.VISIBLE);
+                if(selectedImages.size() == 6 && !selectedImages.contains(imageAdapter.getItem(position))){
+                    // check if the image is not selected already
+                    Toast.makeText(MainActivity.this, "You can only select 6 images", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 imageAdapter.toggleSelection(position);
                 onImageSelected(imageAdapter.getItem(position));
             }
@@ -86,10 +87,11 @@ public class MainActivity extends AppCompatActivity
         mprogressBar.setVisibility(View.GONE);
         mprogressText.setVisibility(View.GONE);
         selectedImages.clear();
+        startGameButton.setVisibility(View.INVISIBLE);
     }
 
     protected void fetchImages(String Url) {
-
+        isFetching = true;
         fetchImageThread = new Thread(new Runnable() {
 
             List<ImageModel> imageModelList = new ArrayList<>();
@@ -102,16 +104,21 @@ public class MainActivity extends AppCompatActivity
                     // Select all image elements from the HTML
                     Elements images = doc.select("img");
 
-                    for (int i = 0; i < Integer.MAX_VALUE; i++) {
+                    for (int i = 0; i < images.size(); i++) {
                         if (Thread.interrupted())
                             return; // stop the thread if interrupted
-                        if(count_pic == 20)
-                            break;
-                        try {
-                            Thread.sleep(100); // simulate network delay
-                        } catch (InterruptedException e) {
-                            return; // stop the thread when interrupted during sleep
+                        if(count_pic == 20) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, "20 images downloaded", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            isFetching = false;
+                            startGameButton.setVisibility(View.VISIBLE);
+                            return;
                         }
+
                         String imageUrl = images.get(i).absUrl("src");
                         if(!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png"))
                             continue;
@@ -125,9 +132,12 @@ public class MainActivity extends AppCompatActivity
                                 mgridView.setVisibility(View.VISIBLE);
                             }
                         });
-
                         count_pic += 1;
-
+                        try {
+                            Thread.sleep(100); // simulate network delay
+                        } catch (InterruptedException e) {
+                            return; // stop the thread when interrupted during sleep
+                        }
                     }
 
                 }   catch (Exception e) {
@@ -138,7 +148,6 @@ public class MainActivity extends AppCompatActivity
 
         });
         fetchImageThread.start();
-
     }
 
     private void onProgressChanged(int progress) {

@@ -51,9 +51,9 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         mHdler.sendMessageDelayed(Message.obtain(mHdler,id,arg,0,extra),ms);
     }
 
-    private void removeActionById(int id) {
+    private void removeActionById() {
         if (mHdler!=null) {
-            mHdler.removeMessages(id);
+            mHdler.removeMessages(CardMatchActivity.IA_FLOP_BACK);
         }
     }
     private Thread gameMonitorThread;
@@ -96,6 +96,8 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     public static final int CARD_MEMBER_NUM = 2;
 
     private int mClickFlag = 0x0;
+
+    private int currentMatchCount = 0;
     // view
     private RelativeLayout mRlCardView;
 
@@ -363,13 +365,20 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         boolean isMatched = selCardView1.realIndex == selCardView2.realIndex;
         if (isMatched) {
             mClickFlag = mClickFlag | (0x1 << selCardView1.realIndex);
+            currentMatchCount++;
+            updateMatchCount(currentMatchCount);
         }
 
         playMatchResAnim(selCardView1.mIvRect, isMatched);
         playMatchResAnim(selCardView2.mIvRect, isMatched);
     }
 
-
+    private void updateMatchCount(int count) {
+        final int totalPairs = cardNum>>1 ; // 假设总共有6对卡片
+        TextView tvMatchCount = findViewById(R.id.tvMatchCount);
+        String matchText = "Match: " + count + "/" + totalPairs;
+        tvMatchCount.setText(matchText);
+    }
     private void playMatchResAnim(ImageView view, boolean isMatched) {
         view.setVisibility(View.VISIBLE);
         if (isMatched) {
@@ -402,7 +411,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             return;
         }
         delayAction.valid();
-        removeActionById(IA_FLOP_BACK);
+        removeActionById();
         view1.setClickable(false);
         view2.setClickable(false);
 
@@ -602,6 +611,8 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         if (gameMonitorThread != null) {
             gameMonitorThread.interrupt();
         }
+        currentMatchCount = 0;
+        updateMatchCount(currentMatchCount);
 
         tvTimer.setTextColor(Color.BLACK);
         tvTimer.setText(formatTime(60000));

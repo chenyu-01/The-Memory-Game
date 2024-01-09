@@ -7,10 +7,11 @@
 
     <EditText
         android:id="@+id/inputUrl"
-        android:layout_width="273dp"
+        android:layout_width="0dp"
         android:layout_height="48dp"
         android:text="@string/url"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/fetchImagesButton"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
@@ -18,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Fetch"
-        app:layout_constraintStart_toEndOf="@id/inputUrl"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/inputUrl" />
 
     <GridView
@@ -43,7 +44,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="start game"
-        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/progressBar"
         app:layout_constraintTop_toTopOf="@+id/gridView"
         app:layout_constraintVertical_bias="0.9"

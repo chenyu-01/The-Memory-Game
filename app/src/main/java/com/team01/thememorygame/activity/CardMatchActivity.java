@@ -4,10 +4,10 @@ import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
@@ -25,12 +25,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.team01.thememorygame.ImageAdapter;
-import com.team01.thememorygame.ImageModel;
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
 import com.team01.thememorygame.bean.CardBean;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
@@ -153,11 +152,18 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     private void initCardList() {
         cardList.clear();
+        File imagesDir = new File(getFilesDir(), "images");
         for (int i=0; i<6; i++) {
             CardBean cardBean = new CardBean();
-            String suffix = "";
+            String suffix = ".png";
             cardBean.imgName_first = "img"+i+ suffix;
             cardBean.imgName_second = "img"+i+ suffix;
+            String imagePathFirst = new File(imagesDir, cardBean.imgName_first).getAbsolutePath();
+            String imagePathSecond = new File(imagesDir, cardBean.imgName_second).getAbsolutePath();
+
+            cardBean.setLocalImagePathFirst(imagePathFirst);
+            cardBean.setLocalImagePathSecond(imagePathSecond);
+
             cardList.add(cardBean);
         }
     }
@@ -184,9 +190,9 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
                 cardLp.topMargin = margin;
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                 cardView.setId(View.generateViewId());
-            }
+            //}
             cardView.setLayoutParams(cardLp);
             mRlCardView.addView(cardView);
 
@@ -197,6 +203,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         }
     }
 
+/*
     private void bindCardViewHolder(final CardViewHolder holder, final int position) {
         if (cardList == null || position >= cardList.size() * CARD_MEMBER_NUM) {
             return;
@@ -216,6 +223,27 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         setCameraDistance(holder.mRlBg, holder.mIvImage);
     }
 
+*/
+
+    private void bindCardViewHolder(final CardViewHolder holder, final int position) {
+        if (cardList == null || position >= cardList.size() * CARD_MEMBER_NUM) {
+            return;
+        }
+
+        final int currPosition = indexList.get(position);
+        holder.position = position;
+        holder.realIndex = currPosition / CARD_MEMBER_NUM;
+        holder.isFirst = currPosition % CARD_MEMBER_NUM != 0;
+        CardBean realCardBean = cardList.get(holder.realIndex);
+
+        String imagePath = holder.isFirst ? realCardBean.getLocalImagePathFirst() : realCardBean.getLocalImagePathSecond();
+        Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
+        holder.mIvImage.setImageBitmap(bitmap);
+
+        holder.mRlBg.setTag(holder);
+        holder.mIvImage.setTag(holder);
+        setCameraDistance(holder.mRlBg, holder.mIvImage);
+    }
 
     private void setCameraDistance(View view1, View view2) {
         int distance = 16000;
@@ -347,11 +375,11 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         if (isMatched) {
             view.setImageResource(R.drawable.btn_rectangle_green);
             view.startAnimation(mAnimSuccess);
-            partlyDone(true); // 本次匹配成功
+            partlyDone(true);
         } else {
             view.setImageResource(R.drawable.btn_rectangle_red);
             view.startAnimation(mAnimFailed);
-            partlyDone(false); // 本次匹配失败
+            partlyDone(false);
         }
     }
 
@@ -493,6 +521,11 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     protected void onDestroy() {
         super.onDestroy();
         releaseAudio();
+        //stop timer
+        if (countDownTimer != null) {
+            countDownTimer.cancel();
+        }
+        //stop game monitor
         if (gameMonitorThread != null) {
             gameMonitorThread.interrupt();
         }

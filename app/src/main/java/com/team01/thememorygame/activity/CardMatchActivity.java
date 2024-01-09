@@ -577,7 +577,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     private void startTimer(long timeInMillis) {
         if(countDownTimer != null)
-        countDownTimer.cancel(); // 取消现有的计时器
+            countDownTimer.cancel(); // 取消现有的计时器
         countDownTimer = new CountDownTimer(timeInMillis, 1000) {
             public void onTick(long millisUntilFinished) {
                 timeLeftInMillis = millisUntilFinished; // 更新剩余时间

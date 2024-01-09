@@ -605,6 +605,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         initView();
         initData();
         loadAnim();
+        startGameMonitor();
 
         if (countDownTimer != null) {
             countDownTimer.cancel();

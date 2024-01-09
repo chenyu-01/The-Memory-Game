@@ -20,9 +20,11 @@ import com.team01.thememorygame.R;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.io.File;
 
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fetchImageThread = new Thread(new Runnable() {
 
             List<ImageModel> imageModelList = new ArrayList<>();
+            HashSet<String> imageUrls = new HashSet<>();
             int count_pic = 0;
 
             @Override
@@ -102,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     for (int i = 0; i < images.size(); i++) {
                         if (Thread.interrupted())
                             return; // stop the thread if interrupted
-                        if(count_pic == 20) {
+                        if(imageUrls.size() == 20) {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -113,11 +116,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             startGameButton.setVisibility(View.VISIBLE);
                             return;
                         }
-
-                        String imageUrl = images.get(i).absUrl("src");
-                        if(!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png"))
+                        Element currentImg = images.get(i);
+                        if(!currentImg.attr("src").contains("https://")){
                             continue;
+                        }
+                        String imageUrl = currentImg.absUrl("src");
+                        if (imageUrls.contains(imageUrl)) {
+                            continue;
+                        }
+                        imageUrls.add(imageUrl);
                         imageModelList.add(new ImageModel(imageUrl));
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -127,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 mgridView.setVisibility(View.VISIBLE);
                             }
                         });
-                        count_pic += 1;
                         try {
                             Thread.sleep(100); // simulate network delay
                         } catch (InterruptedException e) {

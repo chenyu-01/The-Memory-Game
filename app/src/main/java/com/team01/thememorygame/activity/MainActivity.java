@@ -223,7 +223,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             image.compress(Bitmap.CompressFormat.PNG, 100, out); // PNG is a lossless format
                         }
 
-                        imageModel.setLocalPath(newImage.getAbsolutePath());
                     } catch (Exception e) {
                         Log.e("SaveImages", "Error saving image", e);
                     }

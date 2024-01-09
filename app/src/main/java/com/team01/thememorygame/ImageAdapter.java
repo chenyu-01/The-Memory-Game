@@ -11,18 +11,23 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ImageAdapter extends BaseAdapter {
 
     private Context context;
     private List<ImageModel> imageUrls;
 
+    private Set<Integer> selectedPositions;
+
     LayoutInflater inflater;
 
     public ImageAdapter(Context context,List <ImageModel> imageUrls){
         this.context=context;
         this.imageUrls=imageUrls;
+        this.selectedPositions= new HashSet<>();
     }
 
     @Override
@@ -31,7 +36,7 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public ImageModel getItem(int position) {
         return imageUrls.get(position);
     }
 
@@ -40,9 +45,13 @@ public class ImageAdapter extends BaseAdapter {
         return position;
     }
 
+    private static  class ViewHolder{
+        ImageView imageView;
+        ImageView selectImageView;
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        ViewHolder viewHolder;
 
         if (inflater == null) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -50,20 +59,77 @@ public class ImageAdapter extends BaseAdapter {
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.grid_view, parent, false);
+
+            viewHolder = new ViewHolder();
+            viewHolder.imageView = convertView.findViewById(R.id.grid_image);
+            viewHolder.selectImageView = convertView.findViewById(R.id.select_image);
+
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        imageView = convertView.findViewById(R.id.grid_image);
-
-        // Now you can use Picasso to load the image into the ImageView
         Picasso.get().load(imageUrls.get(position).getImageUrl())
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.noimage)
                 .fit()
                 .centerCrop()
-                .into(imageView);
+                .into(viewHolder.imageView);
 
-        return imageView;
+        // Update the visibility of the select image view based on the selection state
+        viewHolder.selectImageView.setVisibility(selectedPositions.contains(position) ? View.VISIBLE : View.GONE);
+
+        return convertView;
     }
 
 
+//    @Override
+//    public View getView(int position, View convertView, ViewGroup parent) {
+//        ImageView imageView;
+//
+//        if (inflater == null) {
+//            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        }
+//
+//        if (convertView == null) {
+//            convertView = inflater.inflate(R.layout.grid_view, parent, false);
+//        }
+//
+//        imageView = convertView.findViewById(R.id.grid_image);
+//        ImageView selectImageView = convertView.findViewById(R.id.select_image);
+//
+//
+//
+//        Picasso.get().load(imageUrls.get(position).getImageUrl())
+//                .placeholder(R.drawable.loading)
+//                .error(R.drawable.noimage)
+//                .fit()
+//                .centerCrop()
+//                .into(imageView);
+//
+//        if(selectedPositions.contains(position)) { // Todo: change this to a better way
+//            selectImageView.setVisibility(View.VISIBLE);
+//        } else {
+//            selectImageView.setVisibility(View.GONE);
+//        }
+//        return imageView;
+//    }
+
+
+    public void setImageDrawable(Drawable placeHolderDrawable) {
+    }
+
+
+    public void toggleSelection(int position) {
+        if(selectedPositions.contains(position)) {
+            selectedPositions.remove(position);
+        } else {
+            selectedPositions.add(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    public Set<Integer> getSelectedPositions() {
+        return selectedPositions;
+    }
 }

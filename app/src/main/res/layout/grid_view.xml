@@ -10,5 +10,10 @@
         android:layout_height="110dp"
         android:scaleType="centerCrop"
         android:id="@+id/grid_image"/>
-
+    <ImageView
+        android:id="@+id/select_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_check"
+        android:visibility="gone" />
 </LinearLayout>

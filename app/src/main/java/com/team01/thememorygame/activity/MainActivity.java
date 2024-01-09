@@ -3,8 +3,6 @@ package com.team01.thememorygame.activity;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -24,10 +22,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
@@ -184,8 +178,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "Please select 6 images", Toast.LENGTH_SHORT).show();
                 return;
             }
-            saveImages();
-            proceedToGame();
+            saveImagesProceedToGame();
         }
     }
 
@@ -197,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void saveImages() {
+    private void saveImagesProceedToGame() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -208,25 +201,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 for (ImageModel imageModel : selectedImages) {
-                    try {
-                        URL imageUrl = new URL(imageModel.getImageUrl());
-                        HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
-                        connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-                        connection.setDoInput(true);
-                        connection.connect();
-                        Log.d("Response", connection.getResponseMessage());
-                        InputStream input = connection.getInputStream();
-                        Bitmap image = BitmapFactory.decodeStream(input);
-
-                        File newImage = new File(imagesDir, "img" + selectedImages.indexOf(imageModel) + ".png");
-                        try (FileOutputStream out = new FileOutputStream(newImage)) {
-                            image.compress(Bitmap.CompressFormat.PNG, 100, out); // PNG is a lossless format
-                        }
-
-                    } catch (Exception e) {
-                        Log.e("SaveImages", "Error saving image", e);
+                    String imageLink = imageModel.getImageUrl();
+                    File destImageFile = new File(imagesDir, "img" + selectedImages.indexOf(imageModel) + ".png");
+                    ImageDownloader imgDL = new ImageDownloader();
+                    if (!imgDL.downloadImage(imageLink, destImageFile)) {
+                        Log.e("SaveImages", "Failed to save image");
+                        return;
                     }
                 }
+                proceedToGame();
             }
         }).start();
     }

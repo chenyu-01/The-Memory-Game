@@ -598,7 +598,10 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         Collections.shuffle(indexList);
         initCardViewLayout();*/
         releaseAudio();
-
+        //stop monitor
+        if (gameMonitorThread != null) {
+            gameMonitorThread.interrupt();
+        }
 
         tvTimer.setTextColor(Color.BLACK);
         tvTimer.setText(formatTime(60000));

@@ -45,9 +45,13 @@ public class ImageAdapter extends BaseAdapter {
         return position;
     }
 
+    private static  class ViewHolder{
+        ImageView imageView;
+        ImageView selectImageView;
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
+        ViewHolder viewHolder;
 
         if (inflater == null) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -55,26 +59,61 @@ public class ImageAdapter extends BaseAdapter {
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.grid_view, parent, false);
+
+            viewHolder = new ViewHolder();
+            viewHolder.imageView = convertView.findViewById(R.id.grid_image);
+            viewHolder.selectImageView = convertView.findViewById(R.id.select_image);
+
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
-
-        imageView = convertView.findViewById(R.id.grid_image);
-
-
 
         Picasso.get().load(imageUrls.get(position).getImageUrl())
                 .placeholder(R.drawable.loading)
                 .error(R.drawable.noimage)
                 .fit()
                 .centerCrop()
-                .into(imageView);
+                .into(viewHolder.imageView);
 
-        if(selectedPositions.contains(position)) { // Todo: change this to a better way
-            imageView.setAlpha(0.5f); // change opacity
-        } else {
-            imageView.setAlpha(1.0f);
-        }
-        return imageView;
+        // Update the visibility of the select image view based on the selection state
+        viewHolder.selectImageView.setVisibility(selectedPositions.contains(position) ? View.VISIBLE : View.GONE);
+
+        return convertView;
     }
+
+
+//    @Override
+//    public View getView(int position, View convertView, ViewGroup parent) {
+//        ImageView imageView;
+//
+//        if (inflater == null) {
+//            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//        }
+//
+//        if (convertView == null) {
+//            convertView = inflater.inflate(R.layout.grid_view, parent, false);
+//        }
+//
+//        imageView = convertView.findViewById(R.id.grid_image);
+//        ImageView selectImageView = convertView.findViewById(R.id.select_image);
+//
+//
+//
+//        Picasso.get().load(imageUrls.get(position).getImageUrl())
+//                .placeholder(R.drawable.loading)
+//                .error(R.drawable.noimage)
+//                .fit()
+//                .centerCrop()
+//                .into(imageView);
+//
+//        if(selectedPositions.contains(position)) { // Todo: change this to a better way
+//            selectImageView.setVisibility(View.VISIBLE);
+//        } else {
+//            selectImageView.setVisibility(View.GONE);
+//        }
+//        return imageView;
+//    }
 
 
     public void setImageDrawable(Drawable placeHolderDrawable) {

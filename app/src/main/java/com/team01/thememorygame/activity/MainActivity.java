@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity
         mgridView.setAdapter(imageAdapter);
         mprogressBar.setVisibility(View.GONE);
         mprogressText.setVisibility(View.GONE);
+        selectedImages.clear();
     }
 
     protected void fetchImages(String Url) {

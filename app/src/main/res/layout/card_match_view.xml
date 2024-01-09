@@ -43,13 +43,14 @@
             android:layout_marginTop="54dp" />
 
 
-        <Button
-            android:id="@+id/hard_mode_button"
+        <Switch
+            android:id="@+id/hard_mode_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enter Hard Mode"
+            android:text="Hard Mode"
             android:layout_below="@+id/card_list"
             tools:layout_editor_absoluteX="0dp"/>
+
     </RelativeLayout>
 
 </ScrollView>

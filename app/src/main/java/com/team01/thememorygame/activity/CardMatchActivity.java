@@ -20,8 +20,10 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -96,7 +98,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     public static final int CARD_MEMBER_NUM = 2;
 
     private int mClickFlag = 0x0;
-
+    private boolean isHardMode = false;
     private int currentMatchCount = 0;
     // view
     private RelativeLayout mRlCardView;
@@ -117,6 +119,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     private DelayAction delayAction = new DelayAction();
 
     private CountDownTimer countDownTimer;
+    private long timeLeftInMillis;
     private TextView tvTimer;
 
     @Override
@@ -126,7 +129,28 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         initData();
         loadAnim();
         startGameMonitor();
-        startTimer();
+        initializeTimer();
+
+        Switch hardModeSwitch = findViewById(R.id.hard_mode_switch);
+
+        if (hardModeSwitch != null) {
+            hardModeSwitch.setChecked(isHardMode);
+        }
+        hardModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isHardMode = isChecked;
+                if (isHardMode) {
+                    hardModeSwitch.setEnabled(false);
+                }
+            }
+        });
+    }
+
+    private void initializeTimer() {
+        tvTimer = findViewById(R.id.tvTimer);
+        timeLeftInMillis = 60000;
+        startTimer(timeLeftInMillis);
     }
 
     private void initView() {
@@ -367,14 +391,25 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             mClickFlag = mClickFlag | (0x1 << selCardView1.realIndex);
             currentMatchCount++;
             updateMatchCount(currentMatchCount);
+            if (isHardMode) {
+                timeLeftInMillis += 5000; // +5s
+            }
+        }
+
+        if (!isMatched&&isHardMode){
+            timeLeftInMillis -= 3000; // -2s
+            timeLeftInMillis = Math.max(timeLeftInMillis, 0);
         }
 
         playMatchResAnim(selCardView1.mIvRect, isMatched);
         playMatchResAnim(selCardView2.mIvRect, isMatched);
+
+        startTimer(timeLeftInMillis);
+
     }
 
     private void updateMatchCount(int count) {
-        final int totalPairs = cardNum>>1 ; // 假设总共有6对卡片
+        final int totalPairs = cardNum>>1 ;
         TextView tvMatchCount = findViewById(R.id.tvMatchCount);
         String matchText = "Match: " + count + "/" + totalPairs;
         tvMatchCount.setText(matchText);
@@ -404,7 +439,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             commitAction(ONCE_DONE, SOUND_WRONG, null, 0);
         }
     }
-
 
     private void flipCard(View view1, View view2, int pos) {
         if (pos < 0) {
@@ -541,18 +575,14 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     }
 
-    private void startTimer() {
-        final long totalTime = 60000; // 60 seconds in milliseconds
-        final long interval = 1000; // 1 second in milliseconds
-        final long last15Seconds = 15000; // 15 seconds in milliseconds
-
-        tvTimer = findViewById(R.id.tvTimer);
-
-        countDownTimer = new CountDownTimer(totalTime, interval) {
+    private void startTimer(long timeInMillis) {
+        if(countDownTimer != null)
+        countDownTimer.cancel(); // 取消现有的计时器
+        countDownTimer = new CountDownTimer(timeInMillis, 1000) {
             public void onTick(long millisUntilFinished) {
-
+                timeLeftInMillis = millisUntilFinished; // 更新剩余时间
                 tvTimer.setText(formatTime(millisUntilFinished));
-                if (millisUntilFinished <= last15Seconds) {
+                if (millisUntilFinished <= 15000) {
                     tvTimer.setTextColor(Color.RED);
                 }
             }
@@ -563,7 +593,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             }
         }.start();
     }
-
     private String formatTime(long millis) {
         long seconds = (millis / 1000) % 60;
         long minutes = (millis / (1000 * 60)) % 60;
@@ -588,21 +617,34 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         dialogBuilder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // Back to ?
                 finish();
             }
         });
 
         AlertDialog gameOverDialog = dialogBuilder.create();
+
+        gameOverDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                restartGame();
+            }
+        });
+
         gameOverDialog.show();
     }
     private void gameOver() {
         showGameOverDialog(checkEnd());
+        Switch hardModeSwitch = findViewById(R.id.hard_mode_switch);
+
+        if (hardModeSwitch != null) {
+            hardModeSwitch.setEnabled(true);
+        }
     }
 
     private void restartGame() {
         mClickFlag = 0x0;
         isStart = false;
+        isHardMode = false;
 /*      initCardList();
         Collections.shuffle(indexList);
         initCardViewLayout();*/
@@ -620,10 +662,23 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         initData();
         loadAnim();
         startGameMonitor();
-
+        Switch hardModeSwitch = findViewById(R.id.hard_mode_switch);
+        if (hardModeSwitch != null) {
+            hardModeSwitch.setEnabled(true);
+            hardModeSwitch.setChecked(false);
+            hardModeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    isHardMode = isChecked;
+                    if (isHardMode) {
+                        hardModeSwitch.setEnabled(false);
+                    }
+                }
+            });
+        }
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
-        startTimer();
+        initializeTimer();
     }
 }

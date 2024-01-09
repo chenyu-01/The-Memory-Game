@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity
-        implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     EditText meditText;
     ProgressBar mprogressBar;
@@ -41,8 +40,8 @@ public class MainActivity extends AppCompatActivity
     Button fetchButton, startGameButton;
     String searchUrl;
     ImageAdapter imageAdapter;
-    Boolean isFetching = false;
-    ArrayList<ImageModel> selectedImages = new ArrayList<>();
+    Boolean isFetching;
+    ArrayList<ImageModel> selectedImages;
     TextView mprogressText;
     Thread fetchImageThread;
 
@@ -56,7 +55,9 @@ public class MainActivity extends AppCompatActivity
         mgridView =findViewById(R.id.gridView);
         fetchButton = findViewById(R.id.fetchImagesButton);
         startGameButton = findViewById(R.id.startGameButton);
-
+        startGameButton.setVisibility(View.INVISIBLE);
+        isFetching = false;
+        selectedImages = new ArrayList<>();
         fetchButton.setOnClickListener(this);
         startGameButton.setOnClickListener(this);
         mgridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

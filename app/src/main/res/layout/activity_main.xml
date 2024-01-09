@@ -9,6 +9,8 @@
         android:id="@+id/inputUrl"
         android:layout_width="273dp"
         android:layout_height="48dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="16dp"
         android:text="@string/url"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

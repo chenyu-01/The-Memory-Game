@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,7 +22,6 @@ import com.team01.thememorygame.R;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.FileOutputStream;
@@ -31,8 +29,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.io.File;
 
@@ -42,13 +38,13 @@ public class MainActivity extends AppCompatActivity
     EditText meditText;
     ProgressBar mprogressBar;
     GridView mgridView;
-    Button mbutton;
+    Button fetchButton, startGameButton;
     String searchUrl;
     ImageAdapter imageAdapter;
 
     ArrayList<ImageModel> selectedImages = new ArrayList<>();
     TextView mprogressText;
-    Thread bkgdthread;
+    Thread fetchImageThread;
 
 
     @Override
@@ -58,17 +54,24 @@ public class MainActivity extends AppCompatActivity
         meditText = findViewById(R.id.inputUrl);
         mprogressBar=findViewById(R.id.progressBar);
         mgridView =findViewById(R.id.gridView);
-        mbutton = findViewById(R.id.button);
-//        searchUrl= "https://stocksnap.io";
+        fetchButton = findViewById(R.id.fetchImagesButton);
+        startGameButton = findViewById(R.id.startGameButton);
 
-        mbutton.setOnClickListener(this);
+        fetchButton.setOnClickListener(this);
+        startGameButton.setOnClickListener(this);
         mgridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if(selectedImages.size() == 6){
+                    // check if the image is not selected already
+                    if(!selectedImages.contains(imageAdapter.getItem(position))){
+                        Toast.makeText(MainActivity.this, "You can only select 6 images", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                startGameButton.setVisibility(View.VISIBLE);
                 imageAdapter.toggleSelection(position);
                 onImageSelected(imageAdapter.getItem(position));
-                // Optional: Update UI based on the number of selected items
-                // For example, enable/disable the confirm button
             }
         });
         mprogressText = findViewById(R.id.download_info);
@@ -80,11 +83,13 @@ public class MainActivity extends AppCompatActivity
         List <ImageModel> emptyList = new ArrayList<>();
         imageAdapter = new ImageAdapter(this,emptyList);
         mgridView.setAdapter(imageAdapter);
+        mprogressBar.setVisibility(View.GONE);
+        mprogressText.setVisibility(View.GONE);
     }
 
     protected void fetchImages(String Url) {
 
-        bkgdthread = new Thread(new Runnable() {
+        fetchImageThread = new Thread(new Runnable() {
 
             List<ImageModel> imageModelList = new ArrayList<>();
             int count_pic = 0;
@@ -93,15 +98,19 @@ public class MainActivity extends AppCompatActivity
             public void run() {
                 try {
                     Document doc = Jsoup.connect(Url).get();
-
                     // Select all image elements from the HTML
                     Elements images = doc.select("img");
 
                     for (int i = 0; i < Integer.MAX_VALUE; i++) {
-                        Thread.sleep(100);
+                        if (Thread.interrupted())
+                            return; // stop the thread if interrupted
                         if(count_pic == 20)
                             break;
-
+                        try {
+                            Thread.sleep(100); // simulate network delay
+                        } catch (InterruptedException e) {
+                            return; // stop the thread when interrupted during sleep
+                        }
                         String imageUrl = images.get(i).absUrl("src");
                         if(!imageUrl.endsWith(".jpg") && !imageUrl.endsWith(".png"))
                             continue;
@@ -120,14 +129,14 @@ public class MainActivity extends AppCompatActivity
 
                     }
 
-                }catch (Exception e) {
+                }   catch (Exception e) {
                     Log.e("Error", e.getMessage());
                 }
 
             }
 
         });
-        bkgdthread.start();
+        fetchImageThread.start();
 
     }
 
@@ -148,24 +157,32 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        if(bkgdthread != null && bkgdthread.isAlive()){
-            bkgdthread.interrupt();
+        if (v.getId() == R.id.fetchImagesButton) {
+            if(fetchImageThread != null && fetchImageThread.isAlive()){
+                fetchImageThread.interrupt();
+            }
+            searchUrl = meditText.getText().toString();
+            if (searchUrl.isEmpty()) {
+                Toast.makeText(this, "Please enter a URL", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            clearImages();
+            fetchImages(searchUrl);
+        } else if (v.getId() == R.id.startGameButton) {
+            if (selectedImages.size() != 6) {
+                Toast.makeText(this, "Please select 6 images", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            saveImages();
+            proceedToGame();
         }
-        clearImages();
-        fetchImages(meditText.getText().toString());
     }
 
-    public void onImageSelected(ImageModel imageModel) {
+    private void onImageSelected(ImageModel imageModel) {
         if (selectedImages.contains(imageModel)) {
             selectedImages.remove(imageModel);
         } else {
             selectedImages.add(imageModel);
-        }
-        if(selectedImages.size() == 6){
-            // save selected images to internal app specific storage
-            saveImages();
-            // Proceed to CardMatchingActivity
-            proceedToGame();
         }
     }
 
@@ -205,7 +222,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void proceedToGame(){
+    private void proceedToGame(){
         Intent intent = new Intent(this, CardMatchActivity.class);
         startActivity(intent);
     }

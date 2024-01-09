@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/fetchImagesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Fetch"
@@ -37,6 +37,19 @@
         app:layout_constraintVertical_bias="0.0">
 
     </GridView>
+
+    <Button
+        android:id="@+id/startGameButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="start game"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+        app:layout_constraintTop_toTopOf="@+id/gridView"
+        app:layout_constraintVertical_bias="0.9"
+        tools:layout_editor_absoluteX="0dp">
+
+    </Button>
 
     <ProgressBar
         android:id="@+id/progressBar"

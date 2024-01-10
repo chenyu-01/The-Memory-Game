@@ -1,32 +1,32 @@
 package com.team01.thememorygame.Utils;
 import android.os.SystemClock;
 
-// 演示操作 防止用户频繁点击导致问题
+// Demo operation  prevent users from causing problems by frequent clicks
 public class DelayAction {
-    private long mLastEvt = 0; // 防止频繁点击
-    private int mTimeInner = 50; // 点击间隔 默认500ms
+    private long mLastEvt = 0; // Prevent frequent clicks
+    private int mTimeInner = 50; // click interval Default 500ms
     public DelayAction() {
     }
-    // 设置延时时间间隔
+    // Set delay interval
     public DelayAction setInner(int ms) {
         mTimeInner = ms;
         return this;
     }
-    // 检查是否有效事件
+    // Check if the event is valid
     public boolean invalid() {
         return !valid();
     }
-    // 检查是否有效事件
+    // Check if the event is valid
     public boolean valid() {
         long cur  = SystemClock.uptimeMillis();
-        // 修改过系统时间导致小于
+        // The system time has been modified so that it is less than
         if (mLastEvt==0||cur>(mLastEvt+mTimeInner)||cur<mLastEvt) {
             mLastEvt = cur;
             return true;
         }
         return false;
     }
-    // 清理
+    // clear
     public void clear() {
         mLastEvt = 0;
     }

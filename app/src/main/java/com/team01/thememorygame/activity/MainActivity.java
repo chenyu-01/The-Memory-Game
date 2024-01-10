@@ -14,6 +14,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.team01.thememorygame.Utils.ImageDownloader;
 import com.team01.thememorygame.model.ImageAdapter;
 import com.team01.thememorygame.model.ImageModel;
 import com.team01.thememorygame.R;

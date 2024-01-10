@@ -29,7 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
-import com.team01.thememorygame.managers.GameTimer;
+import com.team01.thememorygame.game.GameTimer;
 import com.team01.thememorygame.model.CardBean;
 import com.team01.thememorygame.model.CardViewHolder;
 

@@ -1,4 +1,4 @@
-package com.team01.thememorygame.managers;
+package com.team01.thememorygame.game;
 
 import android.graphics.Color;
 import android.os.CountDownTimer;

@@ -1,4 +1,4 @@
-package com.team01.thememorygame.activity;
+package com.team01.thememorygame.Utils;
 
 import java.io.InputStream;
 import java.net.HttpURLConnection;

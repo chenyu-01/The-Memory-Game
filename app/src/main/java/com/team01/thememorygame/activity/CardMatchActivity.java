@@ -133,6 +133,10 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         startGameMonitor();
         initializeTimer();
 
+        setupHardModeSwitcher();
+    }
+
+    private void setupHardModeSwitcher() {
         Switch hardModeSwitch = findViewById(R.id.hard_mode_switch);
 
         if (hardModeSwitch != null) {

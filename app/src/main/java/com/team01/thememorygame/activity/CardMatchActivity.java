@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
+import com.team01.thememorygame.managers.GameTimer;
 import com.team01.thememorygame.model.CardBean;
 import com.team01.thememorygame.model.CardViewHolder;
 
@@ -37,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Locale;
 
-public class CardMatchActivity extends AppCompatActivity implements  Handler.Callback {
+public class CardMatchActivity extends AppCompatActivity implements GameTimer.TimerListener, Handler.Callback {
     private Handler handler;// handle message
 
 
@@ -121,8 +122,9 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
     private DelayAction delayAction = new DelayAction();
 
     private CountDownTimer countDownTimer;
-    private long timeLeftInMillis;
     private TextView tvTimer;
+
+    private GameTimer gameTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,9 +133,15 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         initData();
         loadAnim();
         startGameMonitor();
-        initializeTimer();
+        TextView tvTimer = findViewById(R.id.tvTimer);
+        gameTimer =  new GameTimer(this, tvTimer);
 
         setupHardModeSwitcher();
+    }
+
+    @Override
+    public void onTimerFinish() {
+        gameOver();
     }
 
     private void setupHardModeSwitcher() {
@@ -151,12 +159,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
                 }
             }
         });
-    }
-
-    private void initializeTimer() {
-        tvTimer = findViewById(R.id.tvTimer);
-        timeLeftInMillis = 60000;
-        startTimer(timeLeftInMillis);
     }
 
     private void initView() {
@@ -417,20 +419,17 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             mClickFlag = mClickFlag | (0x1 << selCardView1.realIndex);
             currentMatchCount++;
             updateMatchCount(currentMatchCount);
-            if (isHardMode) {
-                timeLeftInMillis += 5000; // +5s
-            }
         }
 
         if (!isMatched&&isHardMode){
-            timeLeftInMillis -= 3000; // -2s
-            timeLeftInMillis = Math.max(timeLeftInMillis, 0);
+            gameTimer.timeLeftInMillis -= 3000; // -2s
+            gameTimer.timeLeftInMillis = Math.max(gameTimer.timeLeftInMillis, 0);
         }
 
         playMatchResAnim(selCardView1.mIvRect, isMatched);
         playMatchResAnim(selCardView2.mIvRect, isMatched);
 
-        startTimer(timeLeftInMillis);
+        gameTimer.startTimer(gameTimer.timeLeftInMillis);
 
     }
 
@@ -586,24 +585,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     }
 
-    private void startTimer(long timeInMillis) {
-        if(countDownTimer != null)
-            countDownTimer.cancel(); // Cancel existing timer
-        countDownTimer = new CountDownTimer(timeInMillis, 1000) {
-            public void onTick(long millisUntilFinished) {
-                timeLeftInMillis = millisUntilFinished; // Update remaining time
-                tvTimer.setText(formatTime(millisUntilFinished));
-                if (millisUntilFinished <= 15000) {
-                    tvTimer.setTextColor(Color.RED);
-                }
-            }
-
-            public void onFinish() {
-                tvTimer.setText("00:00");
-                gameOver();
-            }
-        }.start();
-    }
     private String formatTime(long millis) {
         long seconds = (millis / 1000) % 60;
         long minutes = (millis / (1000 * 60)) % 60;
@@ -667,8 +648,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         currentMatchCount = 0;
         updateMatchCount(currentMatchCount);
 
-        tvTimer.setTextColor(Color.BLACK);
-        tvTimer.setText(formatTime(60000));
         initView();
         initData();
         loadAnim();
@@ -687,9 +666,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
                 }
             });
         }
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
-        initializeTimer();
+        gameTimer.initializeTimer();
     }
 }

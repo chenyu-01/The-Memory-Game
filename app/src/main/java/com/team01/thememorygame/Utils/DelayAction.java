@@ -1,7 +1,7 @@
 package com.team01.thememorygame.Utils;
 import android.os.SystemClock;
 
-// Demo operation  prevent users from causing problems by frequent clicks
+// prevent users from causing problems by frequent clicks
 public class DelayAction {
     private long mLastEvt = 0; // Prevent frequent clicks
     private int mTimeInner = 50; // click interval Default 500ms

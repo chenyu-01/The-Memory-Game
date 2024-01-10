@@ -10,7 +10,7 @@ import com.team01.thememorygame.R;
 
 public class CardViewHolder {
     public ImageView mIvImage;
-    public RelativeLayout mRlBg;
+    public RelativeLayout mRlBg; // background
     public ImageView mIvRect;
     public int realIndex;
     public boolean isFirst;

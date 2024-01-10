@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             List<ImageModel> imageModelList = new ArrayList<>();
             HashSet<String> imageUrls = new HashSet<>();
-            int count_pic = 0;
 
             @Override
             public void run() {

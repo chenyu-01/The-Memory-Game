@@ -8,13 +8,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaPlayer;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -29,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
+import com.team01.thememorygame.Utils.GameUtils;
 import com.team01.thememorygame.game.GameTimer;
 import com.team01.thememorygame.model.CardBean;
 import com.team01.thememorygame.model.CardViewHolder;
@@ -36,7 +35,6 @@ import com.team01.thememorygame.model.CardViewHolder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Locale;
 
 public class CardMatchActivity extends AppCompatActivity implements GameTimer.TimerListener, Handler.Callback {
     private Handler handler;// handle message
@@ -74,9 +72,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
                             @Override
                             public void run() {
                                 //stop timer
-                                if (countDownTimer != null) {
-                                    countDownTimer.cancel();
-                                }
+                                gameTimer.stopTimer();
                                 gameOver();
                             }
                         });
@@ -98,7 +94,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
     private static final int ONCE_DONE = 3;
     private static final int SOUND_CORRECT = 4;
     private static final int SOUND_WRONG = 5;
-    public static final int CARD_MEMBER_NUM = 2;
+    private static final int CARD_MEMBER_NUM = 2;
 
     private int mClickFlag = 0x0;
     private boolean isHardMode = false;
@@ -120,9 +116,6 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
     private ArrayList<CardBean> cardList = new ArrayList<>();
     private MediaPlayer mediaPlayer;
     private DelayAction delayAction = new DelayAction();
-
-    private CountDownTimer countDownTimer;
-    private TextView tvTimer;
 
     private GameTimer gameTimer;
 
@@ -277,14 +270,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         holder.mRlBg.setTag(holder);
         holder.mIvImage.setTag(holder);
         //Set the 3D effect of the card
-        setCameraDistance(holder.mRlBg, holder.mIvImage);
-    }
-
-    private void setCameraDistance(View view1, View view2) {
-        int distance = 16000;
-        float scale = px(distance);
-        view1.setCameraDistance(scale);
-        view2.setCameraDistance(scale);
+        GameUtils.setCameraDistance(holder.mRlBg, holder.mIvImage, this);
     }
 
 
@@ -422,7 +408,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         }
 
         if (!isMatched&&isHardMode){
-            gameTimer.timeLeftInMillis -= 3000; // -2s
+            gameTimer.timeLeftInMillis -= 5000; // -5s
             gameTimer.timeLeftInMillis = Math.max(gameTimer.timeLeftInMillis, 0);
         }
 
@@ -565,30 +551,17 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         return !(selCardView1 != null && selCardView2 != null);
     }
 
-    public int px(float dp) {
-        int result = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, getResources().getDisplayMetrics());
-        return result > 0 ? result : 1;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
         releaseAudio();
         //stop timer
-        if (countDownTimer != null) {
-            countDownTimer.cancel();
-        }
+        gameTimer.stopTimer();
         //stop game monitor
         if (gameMonitorThread != null) {
             gameMonitorThread.interrupt();
         }
 
-    }
-
-    private String formatTime(long millis) {
-        long seconds = (millis / 1000) % 60;
-        long minutes = (millis / (1000 * 60)) % 60;
-        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 
     private void showGameOverDialog(boolean isWin) {
@@ -666,6 +639,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
                 }
             });
         }
-        gameTimer.initializeTimer();
+        TextView tvTimer = findViewById(R.id.tvTimer);
+        gameTimer = new GameTimer(this, tvTimer);
     }
 }

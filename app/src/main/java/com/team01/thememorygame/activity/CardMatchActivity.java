@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.Locale;
 
 public class CardMatchActivity extends AppCompatActivity implements  Handler.Callback {
-    private Handler mHdler;
+    private Handler mHdler;// handle message
 
 
     private void initHandler() {
@@ -45,19 +45,20 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             mHdler = new Handler(Looper.getMainLooper(),this);
         }
     }
-
+    // send message to Handler to execute delayed operations
     private void commitAction(int id,int arg,Object extra,int ms) {
         if (mHdler==null) {
             initHandler();
         }
         mHdler.sendMessageDelayed(Message.obtain(mHdler,id,arg,0,extra),ms);
     }
-
+    // remove specified type messages from handler
     private void removeActionById() {
         if (mHdler!=null) {
             mHdler.removeMessages(CardMatchActivity.IA_FLOP_BACK);
         }
     }
+    // Game monitoring thread, check whether the game is over
     private Thread gameMonitorThread;
     private void startGameMonitor() {
         gameMonitorThread = new Thread(new Runnable() {
@@ -172,7 +173,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         initIndexList();
 
         initCardViewLayout();
-
+        // execute flipping all cards
         commitAction(IA_FLOP_BACK, FLOP_BACK_ALL, null, 2000);
     }
 
@@ -199,14 +200,14 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         int rows = 4;
         int columns = 3;
         int margin = getResources().getDimensionPixelSize(R.dimen.card_margin);
-
+        //Loop through creating card views and setting layout parameters
         for (int i = 0; i < rows * columns; i++) {
             View cardView = LayoutInflater.from(this).inflate(R.layout.card_view_item, mRlCardView, false);
             RelativeLayout.LayoutParams cardLp = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.WRAP_CONTENT);
 
-
+            // Set the position relationship and margin of the card
             if (i % columns != 0) {
                 cardLp.addRule(RelativeLayout.RIGHT_OF, mRlCardView.getChildAt(i - 1).getId());
                 cardLp.leftMargin = margin;
@@ -261,13 +262,14 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         holder.realIndex = currPosition / CARD_MEMBER_NUM;
         holder.isFirst = currPosition % CARD_MEMBER_NUM != 0;
         CardBean realCardBean = cardList.get(holder.realIndex);
-
+        //Load the image into the card view based on the card data
         String imagePath = holder.isFirst ? realCardBean.getLocalImagePathFirst() : realCardBean.getLocalImagePathSecond();
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
         holder.mIvImage.setImageBitmap(bitmap);
-
+        //Set the label and click event of the card view
         holder.mRlBg.setTag(holder);
         holder.mIvImage.setTag(holder);
+        //Set the 3D effect of the card
         setCameraDistance(holder.mRlBg, holder.mIvImage);
     }
 
@@ -291,54 +293,67 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
 
     private void loadAnim() {
+        // Load flip animation for matching success and failure processing
 
         for (int pos = 0; pos < cardNum; pos++) {
+            //Load the animation of successful flip matching
             mAnimOutSet[pos] = AnimatorInflater.loadAnimator(this, R.animator.flop_match_out);
+            //Load the animation that failed to flip the match
             mAnimInSet[pos] = AnimatorInflater.loadAnimator(this, R.animator.flop_match_in);
             final int finalPos = pos;
+            //Add a listener for the successfully matched flip animation,
+            // and handle the clickability and matching logic of the card
+            // at the end of the animation
             mAnimInSet[pos].addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     super.onAnimationEnd(animation);
-                    setCardViewClickable(finalPos);
+                    setCardViewClickable(finalPos);//Set the clickability of the card
                     if (isStart) {
-                        matchCard(finalPos);
+                        matchCard(finalPos);// If the game has started, execute matching logic
                     }
                 }
             });
         }
 
+        //The animation of card flashing when loading fails
         mAnimFailed = (AlphaAnimation) AnimationUtils.loadAnimation(this, R.anim.twinkle_rect_failed);
         mAnimFailed.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+                //Operation at the beginning of animation
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                // Actions at the end of the animation,
+                // including flipping the card and initializing the selected card view
                 if (selCardView1 == null || selCardView2 == null) return;
 
                 flipCard(selCardView1.mIvImage, selCardView1.mRlBg, selCardView1.position);
                 flipCard(selCardView2.mIvImage, selCardView2.mRlBg, selCardView2.position);
                 selCardView1.isShowing = false;
                 selCardView2.isShowing = false;
-                initSelCardView();
+                initSelCardView();//Initialize the selected card view
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
+                // Operation when animation repeats
             }
 
         });
-
+        //The animation of the card flashing when loading is successful
         mAnimSuccess = AnimationUtils.loadAnimation(this, R.anim.twinkle_rect_success);
         mAnimSuccess.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+                //Operation at the beginning of animation
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                // Operation at the end of the animation, initialize the selected card view
                 initSelCardView();
             }
 
@@ -347,7 +362,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             }
         });
     }
-
+    //Set the clickability of the card view
     private void setCardViewClickable(int position) {
         CardViewHolder cardViewHolder = getCardView(position);
         if (cardViewHolder == null) {
@@ -362,7 +377,12 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         }
     }
 
-
+    // Get the card view holder based on position
+    // Save references to individual subviews within each card view
+    // By saving these elements in a Holder object,
+    // you can avoid repeatedly calling the findViewById() method
+    // when frequently operating the view, thereby reducing resource consumption
+    // and improving application performance.
     private CardViewHolder getCardView(int position) {
         CardViewHolder cardViewHolder = null;
         View view = mRlCardView.getChildAt(position);
@@ -377,7 +397,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
         selCardView2 = null;
     }
 
-
+    // Match cards and handle the success or failure of matching
     private void matchCard(int currPosition) {
 
         if (selCardView1 == null || selCardView2 == null || selCardView2.position != currPosition) {
@@ -387,6 +407,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
             return;
         }
         boolean isMatched = selCardView1.realIndex == selCardView2.realIndex;
+        // If there is a match, update the game status and the number of matches
         if (isMatched) {
             mClickFlag = mClickFlag | (0x1 << selCardView1.realIndex);
             currentMatchCount++;
@@ -577,10 +598,10 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     private void startTimer(long timeInMillis) {
         if(countDownTimer != null)
-            countDownTimer.cancel(); // 取消现有的计时器
+            countDownTimer.cancel(); // Cancel existing timer
         countDownTimer = new CountDownTimer(timeInMillis, 1000) {
             public void onTick(long millisUntilFinished) {
-                timeLeftInMillis = millisUntilFinished; // 更新剩余时间
+                timeLeftInMillis = millisUntilFinished; // Update remaining time
                 tvTimer.setText(formatTime(millisUntilFinished));
                 if (millisUntilFinished <= 15000) {
                     tvTimer.setTextColor(Color.RED);

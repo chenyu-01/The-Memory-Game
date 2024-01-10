@@ -14,8 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.team01.thememorygame.ImageAdapter;
-import com.team01.thememorygame.ImageModel;
+import com.team01.thememorygame.model.ImageAdapter;
+import com.team01.thememorygame.model.ImageModel;
 import com.team01.thememorygame.R;
 
 import org.jsoup.Jsoup;

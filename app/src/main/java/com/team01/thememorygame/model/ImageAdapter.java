@@ -1,8 +1,7 @@
-package com.team01.thememorygame;
+package com.team01.thememorygame.model;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
+import com.team01.thememorygame.R;
+import com.team01.thememorygame.model.ImageModel;
 
 import java.util.HashSet;
 import java.util.List;

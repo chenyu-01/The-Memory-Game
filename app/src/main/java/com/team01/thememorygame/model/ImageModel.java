@@ -1,4 +1,4 @@
-package com.team01.thememorygame;
+package com.team01.thememorygame.model;
 
 public class ImageModel {
     private String imageUrl;

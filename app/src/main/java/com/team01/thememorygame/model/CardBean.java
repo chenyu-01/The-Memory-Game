@@ -1,4 +1,4 @@
-package com.team01.thememorygame.bean;
+package com.team01.thememorygame.model;
 public class CardBean {
     public String imgName_first;
     public String imgName_second;

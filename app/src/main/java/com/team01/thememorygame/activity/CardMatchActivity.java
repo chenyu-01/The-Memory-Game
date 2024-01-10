@@ -29,7 +29,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
-import com.team01.thememorygame.bean.CardBean;
+import com.team01.thememorygame.model.CardBean;
+import com.team01.thememorygame.model.CardViewHolder;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,25 +38,25 @@ import java.util.Collections;
 import java.util.Locale;
 
 public class CardMatchActivity extends AppCompatActivity implements  Handler.Callback {
-    private Handler mHdler;// handle message
+    private Handler handler;// handle message
 
 
     private void initHandler() {
-        if (mHdler==null) {
-            mHdler = new Handler(Looper.getMainLooper(),this);
+        if (handler ==null) {
+            handler = new Handler(Looper.getMainLooper(),this);
         }
     }
     // send message to Handler to execute delayed operations
     private void commitAction(int id,int arg,Object extra,int ms) {
-        if (mHdler==null) {
+        if (handler ==null) {
             initHandler();
         }
-        mHdler.sendMessageDelayed(Message.obtain(mHdler,id,arg,0,extra),ms);
+        handler.sendMessageDelayed(Message.obtain(handler,id,arg,0,extra),ms);
     }
     // remove specified type messages from handler
     private void removeActionById() {
-        if (mHdler!=null) {
-            mHdler.removeMessages(CardMatchActivity.IA_FLOP_BACK);
+        if (handler !=null) {
+            handler.removeMessages(CardMatchActivity.IA_FLOP_BACK);
         }
     }
     // Game monitoring thread, check whether the game is over
@@ -429,7 +430,7 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     }
 
-    private void updateMatchCount(int count) {
+    public void updateMatchCount(int count) {
         final int totalPairs = cardNum>>1 ;
         TextView tvMatchCount = findViewById(R.id.tvMatchCount);
         String matchText = "Match: " + count + "/" + totalPairs;
@@ -477,21 +478,6 @@ public class CardMatchActivity extends AppCompatActivity implements  Handler.Cal
 
     }
 
-    private static class CardViewHolder {
-        private ImageView mIvImage;
-        private RelativeLayout mRlBg;
-        private ImageView mIvRect;
-        private int realIndex;
-        private boolean isFirst;
-        private int position = -1;
-        private boolean isShowing = true;
-
-        private CardViewHolder(View itemView) {
-            mIvImage = (ImageView) itemView.findViewById(R.id.mIvImage);
-            mRlBg = (RelativeLayout) itemView.findViewById(R.id.mRlBg);
-            mIvRect = (ImageView) itemView.findViewById(R.id.rect_iv);
-        }
-    }
 
     @Override
     public boolean handleMessage(Message msg) {

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--旋转-->
+    <!--rotate-->
     <objectAnimator
         android:duration="400"
         android:propertyName="rotationY"
         android:valueFrom="0"
         android:valueTo="180"/>
 
-    <!--消失-->
+    <!--disappear-->
     <objectAnimator
         android:duration="0"
         android:propertyName="alpha"

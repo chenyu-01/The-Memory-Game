@@ -2,17 +2,13 @@ package com.team01.thememorygame.activity;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.AnimatorListenerAdapter;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
@@ -28,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.team01.thememorygame.R;
 import com.team01.thememorygame.Utils.DelayAction;
 import com.team01.thememorygame.Utils.GameUtils;
+import com.team01.thememorygame.game.GameOverDialogManager;
 import com.team01.thememorygame.game.GameTimer;
 import com.team01.thememorygame.model.CardBean;
 import com.team01.thememorygame.model.CardViewHolder;
@@ -36,7 +33,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class CardMatchActivity extends AppCompatActivity implements GameTimer.TimerListener, Handler.Callback {
+public class CardMatchActivity extends AppCompatActivity implements GameTimer.TimerListener, GameOverDialogManager.GameOverDialogListener, Handler.Callback {
+
+    private GameOverDialogManager gameOverDialogManager;
+    @Override
+    public void onRestartGame() {
+        restartGame();
+    }
+    @Override
+    public void onFinishActivity() {
+        finish();
+    }
+
     private Handler handler;// handle message
 
 
@@ -79,7 +87,7 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
                         break;
                     }
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(1000); // check every 1s
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
@@ -91,12 +99,11 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
     private static final int IA_FLOP_BACK = 0;
     private static final int FLOP_BACK_ALL = 1;
     private static final int FLOP_BACK_ONE = 2;
-    private static final int ONCE_DONE = 3;
+    private static final int ONCE_DONE = 3; // check for card match completion
     private static final int SOUND_CORRECT = 4;
     private static final int SOUND_WRONG = 5;
     private static final int CARD_MEMBER_NUM = 2;
 
-    private int mClickFlag = 0x0;
     private boolean isHardMode = false;
     private int currentMatchCount = 0;
     // view
@@ -126,10 +133,14 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         initData();
         loadAnim();
         startGameMonitor();
+        initTimer();
+        setupHardModeSwitcher();
+        gameOverDialogManager = new GameOverDialogManager(this, this);
+    }
+
+    private void initTimer() {
         TextView tvTimer = findViewById(R.id.tvTimer);
         gameTimer =  new GameTimer(this, tvTimer);
-
-        setupHardModeSwitcher();
     }
 
     @Override
@@ -230,47 +241,25 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         }
     }
 
-/*
-    private void bindCardViewHolder(final CardViewHolder holder, final int position) {
+    private void bindCardViewHolder(final CardViewHolder cardViewHolder, final int position) {
         if (cardList == null || position >= cardList.size() * CARD_MEMBER_NUM) {
             return;
         }
 
-        final int currPosition = indexList.get(position);
-        holder.position = position;
-        holder.realIndex = currPosition / CARD_MEMBER_NUM;
-        holder.isFirst = currPosition % CARD_MEMBER_NUM != 0;
-        CardBean realCardBean = cardList.get(holder.realIndex);
-        String imgStr = holder.isFirst ? realCardBean.imgName_first : realCardBean.imgName_second;
-        int cardViewId = this.getResources().getIdentifier(imgStr, "drawable", this.getPackageName());
-        holder.mIvImage.setImageResource(cardViewId);
-
-        holder.mRlBg.setTag(holder);
-        holder.mIvImage.setTag(holder);
-        setCameraDistance(holder.mRlBg, holder.mIvImage);
-    }
-
-*/
-
-    private void bindCardViewHolder(final CardViewHolder holder, final int position) {
-        if (cardList == null || position >= cardList.size() * CARD_MEMBER_NUM) {
-            return;
-        }
-
-        final int currPosition = indexList.get(position);
-        holder.position = position;
-        holder.realIndex = currPosition / CARD_MEMBER_NUM;
-        holder.isFirst = currPosition % CARD_MEMBER_NUM != 0;
-        CardBean realCardBean = cardList.get(holder.realIndex);
+        final int currPosition = indexList.get(position); // from 0 to 11
+        cardViewHolder.position = position;
+        cardViewHolder.realIndex = currPosition / CARD_MEMBER_NUM; // 0, 1, 2, 3, 4, 5
+        cardViewHolder.isFirst = currPosition % CARD_MEMBER_NUM != 0;
+        CardBean realCardBean = cardList.get(cardViewHolder.realIndex);
         //Load the image into the card view based on the card data
-        String imagePath = holder.isFirst ? realCardBean.getLocalImagePathFirst() : realCardBean.getLocalImagePathSecond();
+        String imagePath = cardViewHolder.isFirst ? realCardBean.getLocalImagePathFirst() : realCardBean.getLocalImagePathSecond();
         Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
-        holder.mIvImage.setImageBitmap(bitmap);
+        cardViewHolder.mIvImage.setImageBitmap(bitmap);
         //Set the label and click event of the card view
-        holder.mRlBg.setTag(holder);
-        holder.mIvImage.setTag(holder);
+        cardViewHolder.mRlBg.setTag(cardViewHolder);
+        cardViewHolder.mIvImage.setTag(cardViewHolder);
         //Set the 3D effect of the card
-        GameUtils.setCameraDistance(holder.mRlBg, holder.mIvImage, this);
+        GameUtils.setCameraDistance(cardViewHolder.mRlBg, cardViewHolder.mIvImage, this);
     }
 
 
@@ -402,12 +391,11 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         boolean isMatched = selCardView1.realIndex == selCardView2.realIndex;
         // If there is a match, update the game status and the number of matches
         if (isMatched) {
-            mClickFlag = mClickFlag | (0x1 << selCardView1.realIndex);
             currentMatchCount++;
             updateMatchCount(currentMatchCount);
         }
 
-        if (!isMatched&&isHardMode){
+        if (!isMatched && isHardMode){
             gameTimer.timeLeftInMillis -= 5000; // -5s
             gameTimer.timeLeftInMillis = Math.max(gameTimer.timeLeftInMillis, 0);
         }
@@ -438,8 +426,9 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
         }
     }
 
+    // checking if the game has reached its end
     private boolean checkEnd() {
-        return mClickFlag == (0x1 << cardList.size()) - 1;
+        return currentMatchCount == cardList.size();
     }
 
 
@@ -564,41 +553,8 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
 
     }
 
-    private void showGameOverDialog(boolean isWin) {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setTitle(isWin ? "WIN" : "LOSE");
-        dialogBuilder.setMessage(isWin ? "Congratulations! You've won!" : "Game Over! Try again?");
-
-        int titleColor = isWin ? 0xFFD700 : Color.RED;
-        dialogBuilder.setTitle(Html.fromHtml("<font color='" + titleColor + "'>" + (isWin ? "WIN" : "LOSE") + "</font>"));
-
-        dialogBuilder.setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                restartGame();
-            }
-        });
-
-        dialogBuilder.setNegativeButton("Back", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-
-        AlertDialog gameOverDialog = dialogBuilder.create();
-
-        gameOverDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                restartGame();
-            }
-        });
-
-        gameOverDialog.show();
-    }
     private void gameOver() {
-        showGameOverDialog(checkEnd());
+        gameOverDialogManager.showGameOverDialog(checkEnd());
         Switch hardModeSwitch = findViewById(R.id.hard_mode_switch);
 
         if (hardModeSwitch != null) {
@@ -607,7 +563,6 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
     }
 
     private void restartGame() {
-        mClickFlag = 0x0;
         isStart = false;
         isHardMode = false;
 /*      initCardList();
@@ -639,7 +594,6 @@ public class CardMatchActivity extends AppCompatActivity implements GameTimer.Ti
                 }
             });
         }
-        TextView tvTimer = findViewById(R.id.tvTimer);
-        gameTimer = new GameTimer(this, tvTimer);
+        initTimer();
     }
 }
